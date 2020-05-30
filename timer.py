@@ -1,6 +1,8 @@
 from tkinter import *
+from tkinter import ttk
 import time
 import math
+#import rumps
 
 
 class Timer():
@@ -41,8 +43,6 @@ class Timer():
             self.entry.insert(0, onlynums[0:2] + ":" +
                               onlynums[2:4] + ":" + onlynums[4:6])
         self.entry.icursor("end")
-
-    # def get_time(self):
 
     def initial(self):
         self.entry.configure(justify="right", font=(
@@ -120,7 +120,6 @@ class Timer():
         self.label.place(relx=.5, rely=.35, anchor="center")
         self.button1.configure(
             text="START", highlightbackground='green', command=self.timerCall)
-        #self.endtime = 1800
         temp = self.endtime
         hours = temp//3600
         newtemp = temp - 3600*hours
@@ -131,9 +130,10 @@ class Timer():
         self.label.configure(text=final)
 
     def timerCall(self):
-        self.entry.place_forget()
-        self.label.place(relx=.5, rely=.35, anchor="center")
-        self.new_value()
+        if self.button1['text'] != 'RESUME':
+            self.entry.place_forget()
+            self.label.place(relx=.5, rely=.35, anchor="center")
+            self.new_value()
         self.end = time.time() + self.endtime + 1
         self.button1.configure(
             text="PAUSE", command=self.setframeTimer, highlightbackground='red')
@@ -200,21 +200,24 @@ class Timer():
         self.new_value()
 
     def new_value(self):
-        values = self.entry_text.get().split(':')
-        values = [s for s in values if s.isdigit()]
-        if len(values) != 0:
-            values = list(map(int, values))
-            if len(values) == 1:
-                self.endtime = values[0]
-                self.label.configure(text='00:00:{:02d}'.format(values[0]))
-            if len(values) == 2:
-                self.endtime = values[0]*60 + values[1]
-                self.label.configure(
-                    text='00:{:02d}:{:02d}'.format(values[0], values[1]))
-            if len(values) == 3:
-                self.endtime = values[0] * 3600 + values[1]*60 + values[2]
-                self.label.configure(text='{:02d}:{:02d}:{:02d}'.format(
-                    values[0], values[1], values[2]))
+        if self.button1['text'] != 'RESUME':
+            values = self.entry_text.get().split(':')
+            values = [s for s in values if s.isdigit()]
+            if len(values) != 0:
+                values = list(map(int, values))
+                if len(values) == 1:
+                    self.endtime = values[0]
+                    self.label.configure(text='00:00:{:02d}'.format(values[0]))
+                if len(values) == 2:
+                    self.endtime = values[0]*60 + values[1]
+                    self.label.configure(
+                        text='00:{:02d}:{:02d}'.format(values[0], values[1]))
+                if len(values) == 3:
+                    self.endtime = values[0] * 3600 + values[1]*60 + values[2]
+                    self.label.configure(text='{:02d}:{:02d}:{:02d}'.format(
+                        values[0], values[1], values[2]))
+        else:
+            pass
 
     def set_timer(self):
         self.endtime = 1800
@@ -237,5 +240,8 @@ class Timer():
         self.button2.configure(command=self.stopwatchReset)
 
 
-#  user input, add sound, add ms to stopwatch, button design
-app = Timer()
+# add sound, disallow characters, notifications, add ms to stopwatch, design(ttk), menu bar,
+# fix bugs: reset on pause doesnt immediately change to original time, switching from stopwatch to timer
+# needs to start with 30:00
+if __name__ == '__main__':
+    app = Timer()
