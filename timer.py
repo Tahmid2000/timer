@@ -32,11 +32,11 @@ class Timer():
         minutes = newtemp//60
         seconds = newtemp - 60*minutes
         if hours == 0 and minutes != 0:
-            final = ('{:02d}:{:02d}'.format(minutes, seconds))
+            final = ('{:01d}:{:02d}'.format(minutes, seconds))
         elif hours == 0 and minutes == 0:
             final = (':{:02d}'.format(seconds))
         else:
-            final = ('{:02d}:{:02d}:{:02d}'.format(hours, minutes, seconds))
+            final = ('{:01d}:{:02d}:{:02d}'.format(hours, minutes, seconds))
         return final
 
     def character_limit(self, entry_text):
@@ -72,7 +72,7 @@ class Timer():
 
     def setframeStopwatch(self):
         if self.button1['text'] == 'START':
-            self.label.configure(text='00:00:00')
+            self.label.configure(text=':00')
             self.endtime = 0
             return
         self.label.configure(text=self.newtext)
@@ -118,12 +118,6 @@ class Timer():
                     text="START", command=self.stopwatchCall, highlightbackground='green')
                 return
 
-    def notify(self, title, subtitle, message):
-        t = '-title {!r}'.format(title)
-        s = '-subtitle {!r}'.format(subtitle)
-        m = '-message {!r}'.format(message)
-        os.system('terminal-notifier {}'.format(' '.join([m, t, s])))
-
     def setframeTimer(self):
         if self.button1['text'] == 'START':
             self.endtime = 1800
@@ -147,6 +141,7 @@ class Timer():
             self.label.place(relx=.5, rely=.35, anchor="center")
             self.new_value()
         self.end = time.time() + self.endtime + 1
+        self.button2.configure(state='normal')
         self.button1.configure(
             text="PAUSE", command=self.setframeTimer, highlightbackground='red')
         self.timer()
@@ -194,24 +189,23 @@ class Timer():
         self.button4.place(relx=.59, rely=.1, anchor="center")
 
     def click(self, event):
+        self.paused = False
         self.timerReset()
         self.label.place_forget()
         self.entry.place(relx=.5, rely=.35, anchor="center")
         self.entry.delete(0, END)
-        self.entry.insert(0, self.newtext)
+        self.entry.insert(0, "")
+        self.button2.configure(state='disabled')
         self.entry.focus_set()
         self.entry.icursor("end")
         self.entry_text.trace(
             "w", lambda *args: self.character_limit(self.entry_text))
 
     def click2(self, event):
+        self.button2.configure(state='normal')
         self.label.place(relx=.5, rely=.35, anchor="center")
         self.entry.place_forget()
         self.new_value()
-
-    def enter(self, event):
-        self.click2(event)
-        self.timerCall()
 
     def new_value(self):
         if self.button1['text'] != 'RESUME':
@@ -221,20 +215,28 @@ class Timer():
                 values = list(map(int, values))
                 if len(values) == 1:
                     self.endtime = values[0]
-                    self.label.configure(text='00:00:{:02d}'.format(values[0]))
+                    self.label.configure(text=':{:02d}'.format(values[0]))
                 if len(values) == 2:
                     self.endtime = values[0]*60 + values[1]
                     self.label.configure(
-                        text='00:{:02d}:{:02d}'.format(values[0], values[1]))
+                        text='{:01d}:{:02d}'.format(values[0], values[1]))
                 if len(values) == 3:
                     self.endtime = values[0] * 3600 + values[1]*60 + values[2]
-                    self.label.configure(text='{:02d}:{:02d}:{:02d}'.format(
+                    self.label.configure(text='{:01d}:{:02d}:{:02d}'.format(
                         values[0], values[1], values[2]))
             self.init = self.endtime
         else:
             pass
 
+    def enter(self, event):
+        self.button2.configure(state='normal')
+        self.click2(event)
+        self.entry.place_forget()
+        self.label.place(relx=.5, rely=.35, anchor="center")
+        self.timerCall()
+
     def set_timer(self):
+        self.newtext = ""
         self.endtime = 1800
         self.init = 1800
         self.entry.delete(0, 'end')
@@ -244,6 +246,7 @@ class Timer():
         self.entry.bind("<Button-1>", self.click2)
         self.timerReset()
         self.entry.bind("<Return>", self.enter)
+        self.button2.configure(state='normal')
         self.button1.configure(command=self.timerCall)
         self.button2.configure(command=self.timerReset)
         self.button3.configure(state="disabled")
@@ -268,6 +271,6 @@ class Timer():
         self.button3.configure(highlightbackground="white")
 
 
-# fix start typing something new when paused, add ms to stopwatch, design(ttk)
+# design(ttk)
 if __name__ == '__main__':
     app = Timer()
